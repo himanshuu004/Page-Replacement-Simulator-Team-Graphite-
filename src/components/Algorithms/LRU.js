@@ -1,57 +1,10 @@
 import React from "react";
-import { Box, Typography, makeStyles } from "@material-ui/core";
 import PieChart from "./PieChart";
 import TableHeader from "./TableHeader";
 import RowResultMaker from "./RowResultMaker";
 
-const useStyles = makeStyles({
-  table: {
-    width: "100%",
-
-    fontFamily: "arial, sans-serif",
-    borderCollapse: "collapse",
-    marginTop: 40,
-    marginBottom: 40,
-    fontSize: 20,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "column",
-  },
-  result: {
-    "& tr:nth-child(even)": {
-      backgroundColor: "#273c3c",
-    },
-  },
-  main: {
-    border: "1px solid #dddddd",
-    textAlign: "center",
-    padding: "10px",
-  },
-  summary: {
-    textAlign: "center",
-    marginTop: 30,
-    border: "1px solid white",
-    borderRadius: "25px",
-  },
-  header: {
-    fontSize: 46,
-    textAlign: "center",
-  },
-  sum: {
-    padding: "40px",
-  },
-  sumText: {
-    fontSize: 30,
-    textAlign: "left",
-  },
-});
-
 const LRU = (props) => {
-  const classes = useStyles();
-
   const frames = props.frame;
-
   const pageSeq = props.seq;
 
   let arr = [];
@@ -63,22 +16,20 @@ const LRU = (props) => {
         {f.map((item, index) => {
           return (
             <th
-              className={classes.main}
-              style={{
-                backgroundColor: "#273c3c",
-              }}
-            >{`FRAME ${item}`}</th>
+              className="border border-white text-center px-4 py-2 bg-green-800 text-black"
+              key={index}
+            >
+              {`FRAME ${item}`}
+            </th>
           );
         })}
       </>
     );
   };
 
-  // To find least recently used element's position
   const findLru = (temp, frame) => {
     let minimum = temp[0];
     let pos = 0;
-
     for (let i = 0; i < frame; i++) {
       if (temp[i] < minimum) {
         minimum = temp[i];
@@ -88,18 +39,11 @@ const LRU = (props) => {
     return pos;
   };
 
-  // LRU Algo code
-
-  // Time complexity = O(page * frame)
-  // Space Complexity = O(page)
   const lruResultMaker = (frame, seq) => {
-    console.log("LRU Result Maker");
     let temp = [];
     let flag1;
     let flag2;
-
     let pos;
-
     let faults = 0;
     let counter = 0;
     let result = [];
@@ -108,18 +52,14 @@ const LRU = (props) => {
     let fault;
     let index_arr = [];
 
-    // initialize every element to -1
-    for (let i = 0; i < frames; i++) 
-      frame_arr[i] = -1;
+    for (let i = 0; i < frames; i++) frame_arr[i] = -1;
 
-    // Page sequence iteration
     for (let i = 0; i < seq.length; i++) {
       flag1 = 0;
       flag2 = 0;
       hit = false;
       fault = false;
 
-      // If page seq already in array
       for (let j = 0; j < frame; j++) {
         if (seq[i] === frame_arr[j]) {
           counter++;
@@ -132,7 +72,6 @@ const LRU = (props) => {
         }
       }
 
-      //  Check if frame_arr contains -1
       if (flag1 === 0) {
         for (let j = 0; j < frame; j++) {
           if (frame_arr[j] === -1) {
@@ -148,7 +87,6 @@ const LRU = (props) => {
         }
       }
 
-      // to get the position of least recently used
       if (flag2 === 0) {
         pos = findLru(temp, frame);
         faults++;
@@ -159,7 +97,6 @@ const LRU = (props) => {
         fault = true;
       }
 
-      // initialize array and push current array into it
       let elements = [];
       elements.push(`P${i + 1}   (${seq[i]})`);
       for (let j = 0; j < frame; j++) elements.push(frame_arr[j]);
@@ -174,72 +111,49 @@ const LRU = (props) => {
   };
 
   const { result, faults, index_arr } = lruResultMaker(frames, pageSeq);
-
   const pageHits = pageSeq.length - faults;
 
   return (
     <>
-      <TableHeader algoName={"LRU (Least Recently Used)"} />
+      <TableHeader algoName="LRU (Least Recently Used)" />
 
-      <Box className={classes.table}>
-        <table style={{ overflowX: "auto" }}>
+      <div className="flex flex-col items-center justify-center w-full text-black">
+        <table className="border-collapse w-full overflow-x-auto mt-10 mb-10 text-black">
           <thead>
             <tr>
-              <th
-                className={classes.main}
-                style={{
-                  backgroundColor: "#273c3c",
-
-                  padding: "20px",
-                }}
-              >
+              <th className="border border-white text-center px-4 py-2 bg-green-800 text-black">
                 PAGES
               </th>
               {frameCreator(arr)}
-              <th
-                className={classes.main}
-                style={{
-                  backgroundColor: "#273c3c",
-
-                  padding: "20px",
-                }}
-              >
+              <th className="border border-white text-center px-4 py-2 bg-green-800 text-black">
                 RESULT
               </th>
             </tr>
           </thead>
 
-          <tbody className={classes.result}>
-            {<RowResultMaker result={result} index_arr={index_arr} />}
+          <tbody className="text-black">
+            <RowResultMaker result={result} index_arr={index_arr} />
           </tbody>
         </table>
-        <Box className={classes.summary}>
-          <Box style={{ textAlign: "center", marginTop: 14 }}>
-            <Typography className={classes.header}>Summary</Typography>
-          </Box>
-          <Box className={classes.sum}>
-            <Typography className={classes.sumText}>
-              Total Frames: {props.frame}
-            </Typography>
-            <Typography className={classes.sumText}>
-              Total Pages: {props.seq.length}
-            </Typography>
-            <Typography className={classes.sumText}>
-              Page Sequence: {props.mainSeq}
-            </Typography>
-            <Typography className={classes.sumText}>
-              Page Hit: {pageHits}
-            </Typography>
-            <Typography className={classes.sumText}>
-              Page Faults: {faults}
-            </Typography>
-          </Box>
 
-          <Box className={classes.chart}>
+        <div className="border border-white rounded-3xl mt-8 text-black w-full max-w-4xl">
+          <div className="text-center mt-4">
+            <h2 className="text-4xl">Summary</h2>
+          </div>
+
+          <div className="p-10 text-left text-2xl">
+            <p>Total Frames: {props.frame}</p>
+            <p>Total Pages: {props.seq.length}</p>
+            <p>Page Sequence: {props.mainSeq}</p>
+            <p>Page Hit: {pageHits}</p>
+            <p>Page Faults: {faults}</p>
+          </div>
+
+          <div className="flex justify-center">
             <PieChart hit={pageHits} fault={faults} />
-          </Box>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
     </>
   );
 };
