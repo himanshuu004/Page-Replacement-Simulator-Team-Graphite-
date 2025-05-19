@@ -35,23 +35,28 @@ const PieChart = (props) => {
     ["Fault", props.fault],
   ];
 
-  console.log(pieData);
-
   const pieOptions = {
     title: "Hit Vs Fault Comparison",
-    // pieHole: 0.4,
     is3D: true,
     backgroundColor: "#1a202c",
     titleTextStyle: {
-      color: "#fff",
+      color: "#FFFFFF",
       fontSize: 24,
     },
-
+    legend: {
+      textStyle: {
+        color: "#FFFFFF", // legend label color (Hit/Fault)
+        fontSize: 18,
+      },
+    },
     pieSliceTextStyle: {
-      color: "black",
-      fontSize: 24,
+      color: "#FFFFFF", // in-slice value color
+      fontSize: 18,
     },
-    slices: { 0: { color: "#7C99AC" }, 1: { color: "#FFCDDD" } },
+    slices: {
+      0: { color: "#7C99AC" },
+      1: { color: "#FFCDDD" },
+    },
   };
 
   return (
@@ -64,7 +69,6 @@ const PieChart = (props) => {
         loader={<div>Loading Chart</div>}
         data={pieData}
         options={pieOptions}
-        backgroundColor={"#1a202c"}
         rootProps={{ "data-testid": "3" }}
       />
     </Box>
@@ -72,3 +76,4 @@ const PieChart = (props) => {
 };
 
 export default PieChart;
+  
