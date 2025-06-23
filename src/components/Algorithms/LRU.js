@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import PieChart from "./PieChart";
 import TableHeader from "./TableHeader";
 import RowResultMaker from "./RowResultMaker";
@@ -101,8 +101,11 @@ const LRU = (props) => {
       elements.push(`P${i + 1}   (${seq[i]})`);
       for (let j = 0; j < frame; j++) elements.push(frame_arr[j]);
 
-      if (hit === true) elements.push("HIT");
-      else if (fault === true) elements.push("FAULT");
+      if (hit) {
+        elements.push("HIT", `Page already in Frame ${index_arr[index_arr.length - 1]}`);
+      } else if (fault) {
+        elements.push("FAULT", `Page placed in Frame ${index_arr[index_arr.length - 1]}`);
+      }
 
       result.push(elements);
     }
@@ -113,24 +116,46 @@ const LRU = (props) => {
   const { result, faults, index_arr } = lruResultMaker(frames, pageSeq);
   const pageHits = pageSeq.length - faults;
 
+  const downloadReport = () => {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    const headers = ["PAGE", ...arr.map(n => `FRAME ${n}`), "RESULT", "REPORT"];
+    csvContent += headers.join(",") + "\n";
+
+    result.forEach(row => {
+      csvContent += row.join(",") + "\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "lru_report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <>
       <TableHeader algoName="LRU (Least Recently Used)" />
+
+      <div className="bg-green-100 border-l-4 border-green-600 text-green-900 p-4 my-6 rounded shadow-md max-w-4xl w-full mx-auto">
+        <h2 className="text-xl font-bold mb-2">What is LRU?</h2>
+        <p className="text-md">
+          <strong>LRU (Least Recently Used)</strong> is a page replacement algorithm that replaces the page which has not been used for the longest time. 
+          It is based on the assumption that pages used recently will likely be used again soon, and pages not used recently are less likely to be used in the future.
+        </p>
+      </div>
 
       <div className="flex flex-col items-center justify-center w-full text-black">
         <table className="border-collapse w-full overflow-x-auto mt-10 mb-10 text-black">
           <thead>
             <tr>
-              <th className="border border-white text-center px-4 py-2 bg-green-800 text-black">
-                PAGES
-              </th>
+              <th className="border border-white text-center px-4 py-2 bg-green-800 text-black">PAGES</th>
               {frameCreator(arr)}
-              <th className="border border-white text-center px-4 py-2 bg-green-800 text-black">
-                RESULT
-              </th>
+              <th className="border border-white text-center px-4 py-2 bg-green-800 text-black">RESULT</th>
+              <th className="border border-white text-center px-4 py-2 bg-green-800 text-black">REPORT</th>
             </tr>
           </thead>
-
           <tbody className="text-black">
             <RowResultMaker result={result} index_arr={index_arr} />
           </tbody>
@@ -151,6 +176,15 @@ const LRU = (props) => {
 
           <div className="flex justify-center">
             <PieChart hit={pageHits} fault={faults} />
+          </div>
+
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={downloadReport}
+              className="px-6 py-2 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-full shadow-md hover:shadow-lg transition"
+            >
+              Download Report
+            </button>
           </div>
         </div>
       </div>

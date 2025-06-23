@@ -15,7 +15,7 @@ const FIFO = (props) => {
     return (
       <>
         {f.map((item, index) => (
-          <th className="border text-center p-2 bg-green-900 text-white">{`FRAME ${item}`}</th>
+          <th key={index} className="border text-center p-2 bg-green-900 text-white">{`FRAME ${item}`}</th>
         ))}
       </>
     );
@@ -61,9 +61,9 @@ const FIFO = (props) => {
         elements.push(temp[j]);
       }
       if (hit === true) {
-        elements.push("HIT");
+        elements.push("HIT", `Page already in Frame ${index_arr[index_arr.length - 1]}`);
       } else if (fault === true) {
-        elements.push("FAULT");
+        elements.push("FAULT", `Page placed in Frame ${index_arr[index_arr.length - 1]}`);
       }
 
       result.push(elements);
@@ -72,45 +72,26 @@ const FIFO = (props) => {
     return { result, pageFaults, index_arr };
   };
 
-  const rowResultMaker = (frames, pageSeq) => {
-    const { result, index_arr } = fifoResultGiver(frames, pageSeq);
-
-    return (
-      <>
-        {result.map((item, index) => {
-          let lastEle = item[item.length - 1];
-          return (
-            <tr key={index}>
-              {item.map((i, ind) => {
-                const isResultCol = ind === item.length - 1;
-                const isIndexMatch = ind === index_arr[index] + 1;
-                let bgColor = "bg-white";
-                let textColor = "text-black";
-                if (isResultCol) {
-                  bgColor = lastEle === "HIT" ? "bg-green-300" : "bg-red-400";
-                }
-                if (isIndexMatch) {
-                  bgColor = lastEle === "HIT" ? "bg-lime-400" : "bg-red-500";
-                  textColor = "text-white";
-                }
-                return (
-                  <td
-                    key={ind}
-                    className={`border p-2 text-center ${bgColor} ${textColor}`}
-                  >
-                    {i}
-                  </td>
-                );
-              })}
-            </tr>
-          );
-        })}
-      </>
-    );
-  };
-
-  const { pageFaults } = fifoResultGiver(frames, pageSeq);
+  const { result, pageFaults, index_arr } = fifoResultGiver(frames, pageSeq);
   const pageHits = pageSeq.length - pageFaults;
+
+  const downloadReport = () => {
+    let csvContent = "data:text/csv;charset=utf-8,";
+    const headers = ["PAGE", ...arr.map(n => `FRAME ${n}`), "RESULT", "REPORT"];
+    csvContent += headers.join(",") + "\n";
+
+    result.forEach(row => {
+      csvContent += row.join(",") + "\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "fifo_report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <>
@@ -124,9 +105,36 @@ const FIFO = (props) => {
                 <th className="border p-2">PAGES</th>
                 {frameCreator(arr)}
                 <th className="border p-2">RESULT</th>
+                <th className="border p-2">REPORT</th>
               </tr>
             </thead>
-            <tbody>{rowResultMaker(frames, pageSeq)}</tbody>
+            <tbody>
+              {result.map((item, index) => {
+                let lastEle = item[item.length - 2];
+                return (
+                  <tr key={index}>
+                    {item.map((i, ind) => {
+                      const isResultCol = ind === item.length - 2;
+                      const isIndexMatch = ind === index_arr[index] + 1;
+                      let bgColor = "bg-white";
+                      let textColor = "text-black";
+                      if (isResultCol) {
+                        bgColor = lastEle === "HIT" ? "bg-green-300" : "bg-red-400";
+                      }
+                      if (isIndexMatch) {
+                        bgColor = lastEle === "HIT" ? "bg-lime-400" : "bg-red-500";
+                        textColor = "text-white";
+                      }
+                      return (
+                        <td key={ind} className={`border p-2 text-center ${bgColor} ${textColor}`}>
+                          {i}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
           </table>
         </div>
 
@@ -141,6 +149,14 @@ const FIFO = (props) => {
           </div>
           <div className="mt-6">
             <PieChart hit={pageHits} fault={pageFaults} />
+          </div>
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={downloadReport}
+              className="px-6 py-2 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-full shadow-md hover:shadow-lg transition"
+            >
+              Download Report
+            </button>
           </div>
         </div>
       </div>

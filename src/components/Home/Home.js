@@ -122,6 +122,8 @@ const Home = () => {
   const buttons = [
     { title: "FCFS", action: () => handleClick("fifo") },
     { title: "LRU", action: () => handleClick("lru") }, 
+    { title: "OPR", action: () => handleClick("opr") },
+    
     { title: "RESET", action: handleReset },
   ];
 
