@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import TableHeader from "./TableHeader";
 import PieChart from "./PieChart";
+import videobg from "../Video/fcfs.mp4"; // Assuming the video file is in the same directory
 
 const FIFO = (props) => {
   const frames = props.frame;
@@ -147,9 +148,22 @@ const FIFO = (props) => {
             <p>Page Hit: {pageHits}</p>
             <p>Page Faults: {pageFaults}</p>
           </div>
+
+          {/* Video Tutorial Section */}
+          <div className="mt-6">
+            <h3 className="text-xl font-bold mb-2 text-center">Watch FIFO Tutorial</h3>
+            <div className="flex justify-center">
+              <video width="640" height="360" controls autoPlay loop muted className="rounded shadow-lg">
+                <source src={videobg} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          </div>
+
           <div className="mt-6">
             <PieChart hit={pageHits} fault={pageFaults} />
           </div>
+
           <div className="flex justify-center mt-4">
             <button
               onClick={downloadReport}
