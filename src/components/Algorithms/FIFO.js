@@ -163,6 +163,90 @@ const FIFO = (props) => {
           <div className="mt-6">
             <PieChart hit={pageHits} fault={pageFaults} />
           </div>
+          {/* FIFO Full Documentation */}
+<div className="mt-10 text-left">
+  <h3 className="text-2xl font-bold mb-4">📘 In-Depth: FIFO Page Replacement Algorithm</h3>
+
+  <p className="text-lg mb-4">
+    FIFO (First-In-First-Out) is one of the most fundamental page replacement algorithms used in operating systems to manage memory. When a new page needs to be loaded into memory and no empty frame is available, FIFO replaces the page that was loaded first (i.e., the oldest one).
+  </p>
+
+  <h4 className="text-xl font-semibold mt-4 mb-2">🔍 Basic Principle</h4>
+  <p className="text-lg mb-4">
+    Pages are kept in a queue. When a page must be replaced, the oldest page (the one at the front of the queue) is removed, and the new page is added to the rear.
+  </p>
+
+  <h4 className="text-xl font-semibold mt-4 mb-2">📊 Visual Example</h4>
+  <img
+    src="https://www.studytonight.com/os/images/fifo-page-replacement-algorithm.png"
+    alt="FIFO Working Example"
+    className="my-4 rounded shadow-lg"
+  />
+
+  <h4 className="text-xl font-semibold mt-4 mb-2">🧠 Step-by-Step Illustration</h4>
+  <p className="text-lg mb-4">
+    Let’s say we have 3 memory frames and the page reference string is: <code>7, 0, 1, 2, 0, 3, 0, 4</code>. The page replacement follows this order:
+  </p>
+  <ul className="list-disc list-inside text-lg mb-4">
+    <li>Initially all frames are empty → page fault for 7, 0, 1</li>
+    <li>Page 2 replaces 7 (first loaded) → fault</li>
+    <li>0 is already in memory → hit</li>
+    <li>Page 3 replaces 0 (FIFO) → fault</li>
+    <li>Page 0 replaces 1 → fault</li>
+    <li>Page 4 replaces 2 → fault</li>
+  </ul>
+
+  <h4 className="text-xl font-semibold mt-4 mb-2">⚖️ Pros and Cons</h4>
+  <ul className="list-disc list-inside text-lg mb-4">
+    <li><strong>Pros:</strong> Simple, easy to implement, no additional hardware needed.</li>
+    <li><strong>Cons:</strong> Can suffer from Belady’s anomaly (more frames can cause more page faults).</li>
+  </ul>
+
+  <h4 className="text-xl font-semibold mt-4 mb-2">📌 Real-Life Use Cases</h4>
+  <p className="text-lg mb-4">
+    FIFO is mostly used in simple embedded systems or where implementation complexity must be minimal. It is less efficient for general-purpose operating systems.
+  </p>
+
+  <h4 className="text-xl font-semibold mt-4 mb-2">🆚 FIFO vs LRU vs Optimal</h4>
+  <table className="w-full text-left table-auto border border-collapse border-gray-300 text-sm mb-4">
+    <thead className="bg-green-800 text-white">
+      <tr>
+        <th className="border px-4 py-2">Algorithm</th>
+        <th className="border px-4 py-2">Uses History?</th>
+        <th className="border px-4 py-2">Belady’s Anomaly</th>
+        <th className="border px-4 py-2">Best For</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td className="border px-4 py-2">FIFO</td>
+        <td className="border px-4 py-2">No</td>
+        <td className="border px-4 py-2">Yes</td>
+        <td className="border px-4 py-2">Simple Systems</td>
+      </tr>
+      <tr>
+        <td className="border px-4 py-2">LRU</td>
+        <td className="border px-4 py-2">Yes (recent use)</td>
+        <td className="border px-4 py-2">No</td>
+        <td className="border px-4 py-2">Interactive apps</td>
+      </tr>
+      <tr>
+        <td className="border px-4 py-2">Optimal</td>
+        <td className="border px-4 py-2">Yes (future use)</td>
+        <td className="border px-4 py-2">No</td>
+        <td className="border px-4 py-2">Theoretical/Simulators</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4 className="text-xl font-semibold mt-4 mb-2">📚 More Learning Resources</h4>
+  <ul className="list-disc list-inside text-blue-700 underline text-lg">
+    <li><a href="https://www.javatpoint.com/os-page-replacement-algorithms" target="_blank">Javatpoint - OS Page Replacement</a></li>
+    <li><a href="https://www.geeksforgeeks.org/page-replacement-algorithms-in-operating-systems/" target="_blank">GeeksForGeeks - Replacement Algorithms</a></li>
+    <li><a href="https://en.wikipedia.org/wiki/Page_replacement_algorithm" target="_blank">Wikipedia - Page Replacement</a></li>
+  </ul>
+</div>
+
 
           <div className="flex justify-center mt-4">
             <button

@@ -1,36 +1,19 @@
-import React, { useState } from "react";
-import PieChart from "./PieChart";
+import React from "react";
 import TableHeader from "./TableHeader";
-import RowResultMaker from "./RowResultMaker";
+import PieChart from "./PieChart";
+import videobg1 from "../Video/LRU.mp4"; // Ensure this path is correct
 
-const LRU = (props) => {
-  const frames = props.frame;
-  const pageSeq = props.seq;
+const LRU = ({ frame, seq, mainSeq }) => {
+  const frames = frame;
+  const pageSeq = seq;
 
   let arr = [];
   for (let i = 0; i < frames; i++) arr.push(i + 1);
 
-  const frameCreator = (f) => {
-    return (
-      <>
-        {f.map((item, index) => {
-          return (
-            <th
-              className="border border-white text-center px-4 py-2 bg-green-800 text-black"
-              key={index}
-            >
-              {`FRAME ${item}`}
-            </th>
-          );
-        })}
-      </>
-    );
-  };
-
   const findLru = (temp, frame) => {
     let minimum = temp[0];
     let pos = 0;
-    for (let i = 0; i < frame; i++) {
+    for (let i = 1; i < frame; i++) {
       if (temp[i] < minimum) {
         minimum = temp[i];
         pos = i;
@@ -40,46 +23,33 @@ const LRU = (props) => {
   };
 
   const lruResultMaker = (frame, seq) => {
-    let temp = [];
-    let flag1;
-    let flag2;
-    let pos;
-    let faults = 0;
-    let counter = 0;
-    let result = [];
-    let frame_arr = [];
-    let hit;
-    let fault;
-    let index_arr = [];
-
-    for (let i = 0; i < frames; i++) frame_arr[i] = -1;
+    let temp = [], counter = 0, faults = 0;
+    let frame_arr = new Array(frame).fill(-1);
+    let result = [], index_arr = [];
 
     for (let i = 0; i < seq.length; i++) {
-      flag1 = 0;
-      flag2 = 0;
-      hit = false;
-      fault = false;
+      let hit = false, fault = false;
+      let flag1 = 0, flag2 = 0;
 
       for (let j = 0; j < frame; j++) {
         if (seq[i] === frame_arr[j]) {
+          flag1 = flag2 = 1;
           counter++;
           temp[j] = counter;
           index_arr.push(j);
-          flag1 = 1;
-          flag2 = 1;
           hit = true;
           break;
         }
       }
 
-      if (flag1 === 0) {
+      if (!flag1) {
         for (let j = 0; j < frame; j++) {
           if (frame_arr[j] === -1) {
             faults++;
             frame_arr[j] = seq[i];
-            index_arr.push(j);
             counter++;
             temp[j] = counter;
+            index_arr.push(j);
             flag2 = 1;
             fault = true;
             break;
@@ -87,26 +57,18 @@ const LRU = (props) => {
         }
       }
 
-      if (flag2 === 0) {
-        pos = findLru(temp, frame);
+      if (!flag2) {
+        let pos = findLru(temp, frame);
         faults++;
         counter++;
-        temp[pos] = counter;
         frame_arr[pos] = seq[i];
+        temp[pos] = counter;
         index_arr.push(pos);
         fault = true;
       }
 
-      let elements = [];
-      elements.push(`P${i + 1}   (${seq[i]})`);
-      for (let j = 0; j < frame; j++) elements.push(frame_arr[j]);
-
-      if (hit) {
-        elements.push("HIT", `Page already in Frame ${index_arr[index_arr.length - 1]}`);
-      } else if (fault) {
-        elements.push("FAULT", `Page placed in Frame ${index_arr[index_arr.length - 1]}`);
-      }
-
+      let elements = [`P${i + 1}   (${seq[i]})`, ...frame_arr];
+      elements.push(hit ? "HIT" : "FAULT", hit ? `Page already in Frame ${index_arr[index_arr.length - 1]}` : `Page placed in Frame ${index_arr[index_arr.length - 1]}`);
       result.push(elements);
     }
 
@@ -120,10 +82,7 @@ const LRU = (props) => {
     let csvContent = "data:text/csv;charset=utf-8,";
     const headers = ["PAGE", ...arr.map(n => `FRAME ${n}`), "RESULT", "REPORT"];
     csvContent += headers.join(",") + "\n";
-
-    result.forEach(row => {
-      csvContent += row.join(",") + "\n";
-    });
+    result.forEach(row => { csvContent += row.join(",") + "\n"; });
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -135,60 +94,105 @@ const LRU = (props) => {
   };
 
   return (
-    <>
+    <div className="w-full flex flex-col items-center mt-10 mb-10 px-4">
       <TableHeader algoName="LRU (Least Recently Used)" />
 
-      <div className="bg-green-100 border-l-4 border-green-600 text-green-900 p-4 my-6 rounded shadow-md max-w-4xl w-full mx-auto">
-        <h2 className="text-xl font-bold mb-2">What is LRU?</h2>
-        <p className="text-md">
-          <strong>LRU (Least Recently Used)</strong> is a page replacement algorithm that replaces the page which has not been used for the longest time. 
-          It is based on the assumption that pages used recently will likely be used again soon, and pages not used recently are less likely to be used in the future.
-        </p>
-      </div>
-
-      <div className="flex flex-col items-center justify-center w-full text-black">
-        <table className="border-collapse w-full overflow-x-auto mt-10 mb-10 text-black">
+      <div className="overflow-x-auto w-full max-w-6xl">
+        <table className="w-full border border-green-800">
           <thead>
-            <tr>
-              <th className="border border-white text-center px-4 py-2 bg-green-800 text-black">PAGES</th>
-              {frameCreator(arr)}
-              <th className="border border-white text-center px-4 py-2 bg-green-800 text-black">RESULT</th>
-              <th className="border border-white text-center px-4 py-2 bg-green-800 text-black">REPORT</th>
+            <tr className="bg-green-900 text-white">
+              <th className="border p-2">PAGES</th>
+              {arr.map((item, index) => (
+                <th key={index} className="border p-2">{`FRAME ${item}`}</th>
+              ))}
+              <th className="border p-2">RESULT</th>
+              <th className="border p-2">REPORT</th>
             </tr>
           </thead>
-          <tbody className="text-black">
-            <RowResultMaker result={result} index_arr={index_arr} />
+          <tbody>
+            {result.map((row, index) => {
+              const lastEle = row[row.length - 2];
+              return (
+                <tr key={index}>
+                  {row.map((cell, i) => {
+                    const isResultCol = i === row.length - 2;
+                    const isIndexMatch = i === index_arr[index] + 1;
+                    let bgColor = "bg-white", textColor = "text-black";
+                    if (isResultCol) bgColor = lastEle === "HIT" ? "bg-green-300" : "bg-red-400";
+                    if (isIndexMatch) {
+                      bgColor = lastEle === "HIT" ? "bg-lime-400" : "bg-red-500";
+                      textColor = "text-white";
+                    }
+                    return <td key={i} className={`border p-2 text-center ${bgColor} ${textColor}`}>{cell}</td>;
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
+      </div>
 
-        <div className="border border-white rounded-3xl mt-8 text-black w-full max-w-4xl">
-          <div className="text-center mt-4">
-            <h2 className="text-4xl">Summary</h2>
-          </div>
+      <div className="mt-10 p-6 border border-green-800 rounded-2xl w-full max-w-4xl bg-white text-green-900">
+        <h2 className="text-3xl font-semibold text-center mb-6">Summary</h2>
+        <div className="space-y-3 text-lg">
+          <p>Total Frames: {frame}</p>
+          <p>Total Pages: {seq.length}</p>
+          <p>Page Sequence: {mainSeq}</p>
+          <p>Page Hit: {pageHits}</p>
+          <p>Page Faults: {faults}</p>
+        </div>
 
-          <div className="p-10 text-left text-2xl">
-            <p>Total Frames: {props.frame}</p>
-            <p>Total Pages: {props.seq.length}</p>
-            <p>Page Sequence: {props.mainSeq}</p>
-            <p>Page Hit: {pageHits}</p>
-            <p>Page Faults: {faults}</p>
-          </div>
-
+        <div className="mt-6">
+          <h3 className="text-xl font-bold mb-2 text-center">Watch LRU Tutorial</h3>
           <div className="flex justify-center">
-            <PieChart hit={pageHits} fault={faults} />
-          </div>
+            <video width="640" height="360" controls autoPlay loop muted className="rounded shadow-lg">
+  <source src={videobg1} type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
 
-          <div className="flex justify-center mt-4">
-            <button
-              onClick={downloadReport}
-              className="px-6 py-2 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-full shadow-md hover:shadow-lg transition"
-            >
-              Download Report
-            </button>
           </div>
         </div>
+
+        <div className="mt-6">
+          <PieChart hit={pageHits} fault={faults} />
+        </div>
+
+        <div className="mt-10 text-left">
+          <h3 className="text-2xl font-bold mb-4">📘 LRU Page Replacement Algorithm - Explanation</h3>
+          <p className="text-lg mb-4">
+            LRU (Least Recently Used) replaces the page that has not been used for the longest time. It works on the assumption that pages used recently will likely be used again soon.
+          </p>
+          <h4 className="text-xl font-semibold mt-4 mb-2">📌 How LRU Works</h4>
+          <ul className="list-disc list-inside text-lg mb-4">
+            <li>Track usage history of all pages.</li>
+            <li>Replace the page with the oldest recent use.</li>
+          </ul>
+          <h4 className="text-xl font-semibold mt-4 mb-2">📈 Example Diagram</h4>
+          <img
+            src="https://media.geeksforgeeks.org/wp-content/uploads/20200904140202/LRUPageReplacement.png"
+            alt="LRU Example"
+            className="my-4 rounded shadow-lg"
+          />
+          <p className="text-lg mb-4">
+            In the diagram above, LRU maintains the recent usage of pages in memory and discards the least used page when necessary.
+          </p>
+          <h4 className="text-xl font-semibold mt-4 mb-2">✅ Pros and Cons</h4>
+          <ul className="list-disc list-inside text-lg">
+            <li><strong>Pros:</strong> Better hit rate than FIFO, considers recent usage.</li>
+            <li><strong>Cons:</strong> Needs more memory to track history or timestamps.</li>
+          </ul>
+        </div>
+
+        <div className="flex justify-center mt-6">
+          <button
+            onClick={downloadReport}
+            className="px-6 py-2 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-full shadow-md hover:shadow-lg transition"
+          >
+            Download Report
+          </button>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -121,14 +121,12 @@ const Home = () => {
 
   const buttons = [
     { title: "FCFS", action: () => handleClick("fifo") },
-    { title: "LRU", action: () => handleClick("lru") }, 
+    { title: "LRU", action: () => handleClick("lru") },
     { title: "OPR", action: () => handleClick("opr") },
-    
     { title: "RESET", action: handleReset },
   ];
 
   return (
-
     <>
       <Navbar />
       <Box className={classes.container}>
@@ -136,11 +134,23 @@ const Home = () => {
           <Typography variant="h4" className={classes.header}>Simulator</Typography>
           <Box className={classes.inputBox}>
             <Typography className={classes.label}>Enter Number of Frames</Typography>
-            <input type="number" value={frame} onChange={frameHanadler} className={classes.input} />
+            <input
+              type="number"
+              value={frame}
+              onChange={frameHanadler}
+              className={classes.input}
+              placeholder="e.g., 3"
+            />
           </Box>
           <Box className={classes.inputBox}>
             <Typography className={classes.label}>Enter The Page Sequence</Typography>
-            <input type="text" value={seq} onChange={seqHandler} className={classes.input} />
+            <input
+              type="text"
+              value={seq}
+              onChange={seqHandler}
+              className={classes.input}
+              placeholder="e.g., 1 2 3 2 4 1"
+            />
           </Box>
           <Box className={classes.btns}>
             {buttons.map((btn, idx) => (
